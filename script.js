@@ -2380,62 +2380,22 @@ function setCanvasCursor(mode) {
 }
 
 function prepareCursorAssets() {
-  const scaleCursorAsset = (src, hotspotX, hotspotY) => new Promise((resolve) => {
-    const image = new Image();
-    image.onload = () => {
-      const targetSize = 32;
-      const canvas = document.createElement("canvas");
-      canvas.width = targetSize;
-      canvas.height = targetSize;
-      const context = canvas.getContext("2d");
-      if (context) {
-        context.clearRect(0, 0, targetSize, targetSize);
-        context.imageSmoothingEnabled = true;
-        context.drawImage(image, 0, 0, targetSize, targetSize);
-        try {
-          const data = canvas.toDataURL("image/png");
-          resolve(`url("${data}") ${hotspotX} ${hotspotY}, auto`);
-          return;
-        } catch (e) {
-          // toDataURL can throw for tainted canvases (file:// or cross-origin). Fall back.
-          resolve(`url("${src}") ${hotspotX} ${hotspotY}, auto`);
-          return;
-        }
-        return;
-      }
-      resolve(`url("${src}") ${hotspotX} ${hotspotY}, auto`);
-    };
-    image.onerror = () => resolve(`url("${src}") ${hotspotX} ${hotspotY}, auto`);
-    image.src = src;
-  });
+  cursorAssetUrls.move = 'url("./Assets/MoveCursor.png") 16 16, auto';
+  cursorAssetUrls.rotate = 'url("./Assets/RotateCursor.png") 16 16, auto';
+  cursorAssetUrls.pencil = 'url("./Assets/Pencil_Cursor.png") 50 105, auto';
+  if (stage === "line") {
+    setCanvasCursor("pencil");
+  }
 
-  scaleCursorAsset("./Assets/MoveCursor.png", 16, 16).then((cursorValue) => {
-    cursorAssetUrls.move = cursorValue;
-    if (stage === "free-draw" && activeTool === "translate") {
-      updateTransformCursor();
-    }
-  });
+  cursorAssetUrls.eraser = 'url("./Assets/Eraser.png") 32 32, auto';
 
-  scaleCursorAsset("./Assets/RotateCursor.png", 16, 16).then((cursorValue) => {
-    cursorAssetUrls.rotate = cursorValue;
-    if (stage === "free-draw" && activeTool === "translate") {
-      updateTransformCursor();
-    }
-  });
+  if (stage === "free-draw" && activeTool === "translate") {
+    updateTransformCursor();
+  }
 
-  scaleCursorAsset("./Assets/Pencil_Cursor.png", 50, 105).then((cursorValue) => {
-    cursorAssetUrls.pencil = cursorValue;
-    if (stage === "line") {
-      setCanvasCursor("pencil");
-    }
-  });
-
-  scaleCursorAsset("./Assets/Eraser.png", 32, 32).then((cursorValue) => {
-    cursorAssetUrls.eraser = cursorValue;
-    if (stage === "free-draw" && activeTool === "erase") {
-      updateTransformCursor();
-    }
-  });
+  if (stage === "free-draw" && activeTool === "erase") {
+    updateTransformCursor();
+  }
 }
 
 function initializeButtonJitter() {
